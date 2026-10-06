@@ -11,9 +11,14 @@ class ViewServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        $settings = Schema::hasTable('settings')
-            ? Setting::all()->pluck('value', 'key')
-            : collect();
+        try {
+            $settings = Schema::hasTable('settings')
+                ? Setting::all()->pluck('value', 'key')
+                : collect();
+        } catch (\Throwable $e) {
+            // Database unavailable (e.g. during image build) - boot without settings
+            $settings = collect();
+        }
 
         View::share('settings', $settings);
     }
